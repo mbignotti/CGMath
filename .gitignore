@@ -30,3 +30,19 @@
 *.exe
 *.out
 *.app
+
+
+# Output Dir
+x64
+
+# Test utilities
+packages
+
+# Visual Studio files
+.vs
+
+# Main file
+main.cpp
+
+# Cpp properties
+CppProperties.json
