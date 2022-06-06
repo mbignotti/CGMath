@@ -5,7 +5,7 @@
 #include <iostream>
 #include <initializer_list>
 
-namespace CGMath {
+namespace cgm {
 
 	struct Shape
 	{

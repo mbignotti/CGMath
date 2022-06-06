@@ -3,7 +3,7 @@
 
 namespace TestMatrix {
 
-	using namespace CGMath;
+	using namespace cgm;
 
 	TEST(TestMatrix, TestMatrixAccessOperator)
 	{

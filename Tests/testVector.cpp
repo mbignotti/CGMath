@@ -3,7 +3,7 @@
 
 namespace TestVector {
 
-	using namespace CGMath;
+	using namespace cgm;
 
 	TEST(TestVector, TestVectorAccessOperator)
 	{
