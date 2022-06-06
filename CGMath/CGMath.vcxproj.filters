@@ -10,10 +10,14 @@
     <ClInclude Include="CGMath.h">
       <Filter>src</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClInclude Include="Utils.h">
       <Filter>src</Filter>
-    </ClCompile>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="vec3.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
