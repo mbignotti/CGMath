@@ -10,14 +10,28 @@
     <ClInclude Include="CGMath.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
+    <ClInclude Include="matrix.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="Vector.h">
+    <ClInclude Include="vec2.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="vec3.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="vec4.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

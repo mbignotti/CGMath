@@ -146,9 +146,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CGMath.h" />
-    <ClInclude Include="Utils.h" />
+    <ClInclude Include="matrix.h" />
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="vec2.h" />
     <ClInclude Include="vec3.h" />
-    <ClInclude Include="Vector.h" />
+    <ClInclude Include="vec4.h" />
+    <ClInclude Include="vector.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
