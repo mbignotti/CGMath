@@ -4,12 +4,12 @@
 namespace cgm {
 
 	template <typename T>
-	struct Vec3 : public Vector<T, 3> {
+	struct Vec4 : public Vector<T, 4> {
 
-		using Vector<T, 3>::shape;
-		using Vector<T, 3>::strides;
-		using Vector<T, 3>::data;
-		using Vector<T, 3>::Vector;
+		using Vector<T, 4>::shape;
+		using Vector<T, 4>::strides;
+		using Vector<T, 4>::data;
+		using Vector<T, 4>::Vector;
 
 		// Access Operators
 		T& operator[](const int i)
@@ -23,7 +23,7 @@ namespace cgm {
 		}
 
 		// Assignment Operator
-		Vec3<T>& operator=(const Vec3<T>& vec)
+		Vec4<T>& operator=(const Vec4<T>& vec)
 		{
 			shape = vec.shape;
 			strides = vec.strides;
@@ -41,21 +41,12 @@ namespace cgm {
 		inline T& z() { return data[2]; }
 		inline const T& z() const { return data[2]; }
 
+		inline T& w() { return data[3]; }
+		inline const T& w() const { return data[3]; }
+
 	};
 
-	template <typename T>
-	Vec3<T> cross(const Vec3<T>& lhs, const Vec3<T>& rhs)
-	{
-		Vec3<T> result
-		{
-			lhs[1] * rhs[2] - lhs[2] * rhs[1],
-			lhs[2] * rhs[0] - lhs[0] * rhs[2],
-			lhs[0] * rhs[1] - lhs[1] * rhs[0]
-		};
-		return result;
-	}
-
-	typedef Vec3<int> Vec3i;
-	typedef Vec3<float> Vec3f;
+	typedef Vec4<int> Vec4i;
+	typedef Vec4<float> Vec4f;
 
 }

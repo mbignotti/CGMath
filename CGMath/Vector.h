@@ -4,45 +4,57 @@
 #include <assert.h>
 #include <iostream>
 #include <initializer_list>
-#include <Utils.h>
+#include <utils.h>
 
 namespace cgm {
 
-	template <typename T, size_t n, bool ColumnMajor = true>
+	template <typename T, int n>
 	struct Vector
 	{
-
 		// Attributes
+		// Defaults to column major. Define ROW_MAJOR to use a row major memory layout.
+		// For vectors, the memory layout does not change, but shape, strides and operations that depend on them do.
+#ifndef ROW_MAJOR
+
+		Shape shape{ n, 1 };
+		Strides strides{ sizeof(T) * n, sizeof(T) };
+
+#else
+		Shape shape{ 1, n };
+		Strides strides{ sizeof(T), sizeof(T) * n };
+
+#endif // ROW_MAJOR
+
 		T data[n];
 
 		// Constructors
 		Vector() : data{ } { }
 
-		Vector(std::initializer_list<T> init_list)
-			: data{ }
-		{
-			int count{ 0 };
-			for (T element : init_list)
-			{
-				data[count] = element;
-				++count;
-			}
-		}
-
-		Vector(T xx) : data{ }
+		explicit Vector(T value) : data{ }
 		{
 			for (int i = 0; i < n; i++)
 			{
-				data[i] = xx;
+				data[i] = value;
 			}
-
 		}
 
-		Vector(Vector<T, n-1> other, T scalar) :
-			data{ }
+		Vector(std::initializer_list<T> init_list) : data{ }
+		{
+			assert(init_list.size() == n);
+
+			int i = 0;
+			for (const auto val : init_list)
+			{
+				data[i] = val;
+				++i;
+			}
+			
+		}
+
+		Vector(Vector<T, n - 1> other, T scalar) : data{ }
 		{
 			std::copy(other.data, other.data + n - 1, data);
-			data[n-1] = scalar;
+			data[n - 1] = scalar;
 		}
 
 		// Destructor
@@ -50,129 +62,49 @@ namespace cgm {
 
 		// Operators
 		// Access operators
-		T& operator[](const size_t i)
+		T& operator[](const int i)
 		{
-			assert(i < n); return data[i];
+			return data[i];
 		}
 
-		T operator[](const size_t i) const
+		T operator[](const int i) const
 		{
-			assert(i < n); return data[i];
+			return data[i];
 		}
 
-		// Algebraic Operators
-		Vector<T, n, ColumnMajor> Add(const Vector<T, n>& v) const
+		// Assignment Operator
+		Vector<T, n>& operator=(const Vector<T, n>& vec)
 		{
-			Vector<T, n, ColumnMajor> vec;
-			for (int i = 0; i < n; i++)
-			{
-				vec[i] = data[i] + v[i];
-			}
-			return vec;
-		}
+			shape = vec.shape;
+			strides = vec.strides;
+			data = vec.data;
 
-		Vector<T, n, ColumnMajor> Add(const T scalar) const
-		{
-			Vector<T, n, ColumnMajor> vec;
-			for (int i = 0; i < n; i++)
-			{
-				vec[i] = data[i] + scalar;
-			}
-			return vec;
-		}
-
-		Vector<T, n, ColumnMajor> Subtract(const Vector<T, n>& v) const
-		{
-			Vector<T, n, ColumnMajor> vec;
-			for (int i = 0; i < n; i++)
-			{
-				vec[i] = data[i] - v[i];
-			}
-			return vec;
-		}
-
-		Vector<T, n, ColumnMajor> Subtract(const T scalar) const
-		{
-			Vector<T, n, ColumnMajor> vec;
-			for (int i = 0; i < n; i++)
-			{
-				vec[i] = data[i] - scalar;
-			}
-			return vec;
-		}
-
-		Vector<T, n, ColumnMajor> Multiply(const Vector<T, n>& v) const
-		{
-			Vector<T, n, ColumnMajor> vec;
-			for (int i = 0; i < n; i++)
-			{
-				vec[i] = data[i] * v[i];
-			}
-			return vec;
-		}
-
-		Vector<T, n, ColumnMajor> Multiply(const T scalar) const
-		{
-			Vector<T, n, ColumnMajor> vec;
-			for (int i = 0; i < n; i++)
-			{
-				vec[i] = data[i] * scalar;
-			}
-			return vec;
-		}
-
-		Vector<T, n, ColumnMajor> Divide(const Vector<T, n>& v) const
-		{
-			Vector<T, n, ColumnMajor> vec;
-			for (int i = 0; i < n; i++)
-			{
-				vec[i] = data[i] / v[i];
-			}
-			return vec;
-		}
-
-		Vector<T, n, ColumnMajor> Divide(const T scalar) const
-		{
-			Vector<T, n, ColumnMajor> vec;
-			T factor = 1 / scalar;
-			for (int i = 0; i < n; i++)
-			{
-				vec[i] = data[i] * factor;
-			}
-			return vec;
+			return *this;
 		}
 
 		// Methods
-		friend std::ostream& operator << (std::ostream& out, const Vector<T, n, ColumnMajor>& vec)
+		friend std::ostream& operator << (std::ostream& out, const Vector<T, n>& vec)
 		{
-			for (size_t i = 0; i < n; i++)
+			for (int i = 0; i < n; i++)
 			{
 				out << vec[i] << " ";
 			}
 			return out;
 		}
 
-		constexpr int size() { return n; }
-
-		Shape shape()
+		inline void transpose()
 		{
-			if (!ColumnMajor)
-			{
-				Shape s(1, n);
-				return s;
-			}
-			else
-			{
-				Shape s(n, 1);
-				return s;
-			}
+			shape.transpose();
+			strides.transpose();
 		}
+
+		constexpr int size() { return n; }
 
 		T norm2() { return dot(*this, *this); }
 
 		float norm() { return std::sqrt(norm2()); }
 
-		void normalized()
+		void normalize()
 		{
 			float length = norm();
 			if (length > 0)
@@ -181,62 +113,144 @@ namespace cgm {
 				*this = *this * factor;
 			}
 		}
+
+		// Algebraic Operators
+		Vector<T, n> Add(const Vector<T, n>& v) const
+		{
+			Vector<T, n> vec;
+			for (int i = 0; i < n; i++)
+			{
+				vec[i] = data[i] + v[i];
+			}
+			return vec;
+		}
+
+		Vector<T, n> Add(const T scalar) const
+		{
+			Vector<T, n> vec;
+			for (int i = 0; i < n; i++)
+			{
+				vec[i] = data[i] + scalar;
+			}
+			return vec;
+		}
+
+		Vector<T, n> Subtract(const Vector<T, n>& v) const
+		{
+			Vector<T, n> vec;
+			for (int i = 0; i < n; i++)
+			{
+				vec[i] = data[i] - v[i];
+			}
+			return vec;
+		}
+
+		Vector<T, n> Subtract(const T scalar) const
+		{
+			Vector<T, n> vec;
+			for (int i = 0; i < n; i++)
+			{
+				vec[i] = data[i] - scalar;
+			}
+			return vec;
+		}
+
+		Vector<T, n> Multiply(const Vector<T, n>& v) const
+		{
+			Vector<T, n> vec;
+			for (int i = 0; i < n; i++)
+			{
+				vec[i] = data[i] * v[i];
+			}
+			return vec;
+		}
+
+		Vector<T, n> Multiply(const T scalar) const
+		{
+			Vector<T, n> vec;
+			for (int i = 0; i < n; i++)
+			{
+				vec[i] = data[i] * scalar;
+			}
+			return vec;
+		}
+
+		Vector<T, n> Divide(const Vector<T, n>& v) const
+		{
+			Vector<T, n> vec;
+			for (int i = 0; i < n; i++)
+			{
+				vec[i] = data[i] / v[i];
+			}
+			return vec;
+		}
+
+		Vector<T, n> Divide(const T scalar) const
+		{
+			Vector<T, n> vec;
+			T factor = 1 / scalar;
+			for (int i = 0; i < n; i++)
+			{
+				vec[i] = data[i] * factor;
+			}
+			return vec;
+		}
+
 	};
 
-
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> operator + (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
+	template <typename T, int n>
+	Vector<T, n> operator + (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
 	{
 		return lhs.Add(rhs);
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> operator + (const Vector<T, n>& vec, const T scalar)
+	template <typename T, int n>
+	Vector<T, n> operator + (const Vector<T, n>& vec, const T scalar)
 	{
 		return vec.Add(scalar);
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> operator - (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
+	template <typename T, int n>
+	Vector<T, n> operator - (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
 	{
 		return lhs.Subtract(rhs);
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> operator - (const Vector<T, n>& vec, const T scalar)
+	template <typename T, int n>
+	Vector<T, n> operator - (const Vector<T, n>& vec, const T scalar)
 	{
 		return vec.Subtract(scalar);
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> operator * (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
+	template <typename T, int n>
+	Vector<T, n> operator * (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
 	{
 		return lhs.Multiply(rhs);
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> operator * (const Vector<T, n>& vec, const T scalar)
+	template <typename T, int n>
+	Vector<T, n> operator * (const Vector<T, n>& vec, const T scalar)
 	{
 		return vec.Multiply(scalar);
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> operator / (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
+	template <typename T, int n>
+	Vector<T, n> operator / (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
 	{
 		return lhs.Divide(rhs);
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> operator / (const Vector<T, n>& vec, const T scalar)
+	template <typename T, int n>
+	Vector<T, n> operator / (const Vector<T, n>& vec, const T scalar)
 	{
 		return vec.Divide(scalar);
 	}
 
-	template <typename T, size_t n>
+	template <typename T, int n>
 	bool operator == (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
 	{
 		bool equality{ true };
-		for (size_t i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 		{
 			if (equality)
 			{
@@ -250,22 +264,22 @@ namespace cgm {
 		return equality;
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<bool, n, ColumnMajor> operator == (const Vector<T, n>& lhs, const T scalar)
+	template <typename T, int n>
+	Vector<bool, n> operator == (const Vector<T, n>& lhs, const T scalar)
 	{
 		Vector<bool, n> equality(true);
-		for (size_t i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 		{
 			equality[i] = lhs[i] == scalar;
 		}
 		return equality;
 	}
 
-	template <size_t n>
+	template <int n>
 	bool any(const Vector<bool, n>& vec)
 	{
 		bool trueCondition{ false };
-		for (size_t i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 		{
 			if (vec[i])
 			{
@@ -276,11 +290,11 @@ namespace cgm {
 		return trueCondition;
 	}
 
-	template <size_t n>
+	template <int n>
 	bool all(const Vector<bool, n>& vec)
 	{
 		bool trueCondition{ true };
-		for (size_t i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 		{
 			if (!vec[i])
 			{
@@ -291,82 +305,49 @@ namespace cgm {
 		return trueCondition;
 	}
 
-	template <typename T, size_t n>
+	template <typename T, int n>
 	T sum(Vector<T, n> vec)
 	{
-		T ret{ 0 };
+		T result{ 0 };
 		for (int i = 0; i < n; i++)
 		{
-			ret += vec[i];
+			result += vec[i];
 		}
-		return ret;
+		return result;
 	}
 
-	template <typename T, size_t n>
+	template <typename T, int n>
 	T dot(const Vector<T, n>& lhs, const Vector<T, n>& rhs)
 	{
-		T ret{ 0 };
-		for (size_t i = 0; i < n; i++)
+		T result{ 0 };
+		for (int i = 0; i < n; i++)
 		{
-			ret += lhs[i] * rhs[i];
+			result += lhs[i] * rhs[i];
 		}
-		return ret;
+		return result;
 	}
 
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> normalize(Vector<T, n> vec)
+	template <typename T, int n>
+	Vector<T, n> normalized(const Vector<T, n>& vec)
 	{
-		vec.normalized();
-		return vec;
-	}
-
-	template <typename T, size_t n, bool ColumnMajor = true>
-	Vector<T, n, ColumnMajor> transpose(Vector<T, n, false>& vec)
-	{
-		Vector<T, n, ColumnMajor> vecT;
-		for (size_t i = 0; i < n; i++)
-		{
-			vecT[i] = vec[i];
-		}
-		return vecT;
-	}
-
-	template <typename T, size_t n, bool ColumnMajor = false>
-	Vector<T, n, ColumnMajor> transpose(Vector<T, n, true>& vec)
-	{
-		Vector<T, n, ColumnMajor> vecT;
-		for (size_t i = 0; i < n; i++)
-		{
-			vecT[i] = vec[i];
-		}
-		return vecT;
-	}
-
-	template <typename T, bool ColumnMajor = true>
-	Vector<T, 3, ColumnMajor> cross(const Vector<T, 3>& lhs, const Vector<T, 3>& rhs)
-	{
-		Vector<T, 3> vec
-		{
-			lhs[1] * rhs[2] - lhs[2] * rhs[1],
-			lhs[2] * rhs[0] - lhs[0] * rhs[2],
-			lhs[0] * rhs[1] - lhs[1] * rhs[0]
-		};
-		return vec;
+		Vector<T, n> result = vec;
+		result.normalize();
+		return result;
 	}
 
 	template<typename T, int n1, int n2>
 	Vector<T, n1> embed(const Vector<T, n2>& v, T fill = 1)
 	{
-		Vector<T, n1> ret;
-		for (int i = n1; i--; ret[i] = (i < n2 ? v[i] : fill));
-		return ret;
+		Vector<T, n1> result;
+		for (int i = n1; i--; result[i] = (i < n2 ? v[i] : fill));
+		return result;
 	}
 
 	template<typename T, int n1, int n2>
 	Vector<T, n1> proj(const Vector<T, n2>& v)
 	{
-		Vector<T, n1> ret;
-		for (int i = n1; i--; ret[i] = v[i]);
-		return ret;
+		Vector<T, n1> result;
+		for (int i = n1; i--; result[i] = v[i]);
+		return result;
 	}
 }
