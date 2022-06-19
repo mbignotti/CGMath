@@ -13,15 +13,13 @@ namespace cgm {
 	{
 		// Attributes
 		// Defaults to column major. Define ROW_MAJOR to use a row major memory layout.
-		// For vectors, the memory layout does not change, but shape, strides and operations that depend on them do.
+		// For vectors, the memory layout does not change, but shape and operations that depend on it do.
 #ifndef ROW_MAJOR
 
 		Shape shape{ n, 1 };
-		Strides strides{ sizeof(T) * n, sizeof(T) };
 
 #else
 		Shape shape{ 1, n };
-		Strides strides{ sizeof(T), sizeof(T) * n };
 
 #endif // ROW_MAJOR
 
@@ -76,7 +74,6 @@ namespace cgm {
 		Vector<T, n>& operator=(const Vector<T, n>& vec)
 		{
 			shape = vec.shape;
-			strides = vec.strides;
 			data = vec.data;
 
 			return *this;
@@ -95,7 +92,6 @@ namespace cgm {
 		inline void transpose()
 		{
 			shape.transpose();
-			strides.transpose();
 		}
 
 		constexpr int size() { return n; }

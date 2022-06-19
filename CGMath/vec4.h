@@ -7,7 +7,6 @@ namespace cgm {
 	struct Vec4 : public Vector<T, 4> {
 
 		using Vector<T, 4>::shape;
-		using Vector<T, 4>::strides;
 		using Vector<T, 4>::data;
 		using Vector<T, 4>::Vector;
 
@@ -26,7 +25,6 @@ namespace cgm {
 		Vec4<T>& operator=(const Vec4<T>& vec)
 		{
 			shape = vec.shape;
-			strides = vec.strides;
 			data = vec.data;
 
 			return *this;
