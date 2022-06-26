@@ -21,7 +21,7 @@ namespace cgm {
 #else
 		Shape shape{ 1, n };
 
-#endif // ROW_MAJOR
+#endif // !ROW_MAJOR
 
 		T data[n];
 

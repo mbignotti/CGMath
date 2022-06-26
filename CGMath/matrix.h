@@ -12,16 +12,17 @@ namespace cgm {
 	struct Matrix
 	{
 		// Attributes
+		Shape shape{ n, m };
+
 #ifndef ROW_MAJOR
 
-		Shape shape{ n, m };
 		Strides strides{ sizeof(T) * m, sizeof(T) };
 
 #else
-		Shape shape{ m, n };
+
 		Strides strides{ sizeof(T), sizeof(T) * n };
 
-#endif // ROW_MAJOR
+#endif // !ROW_MAJOR
 
 		static const int size = n * m;
 		T data[size];
@@ -42,14 +43,14 @@ namespace cgm {
 			assert(init_list.size() == size);
 
 			int i = 0;
-			for (const auto val : init_list)
+			for (const auto value : init_list)
 			{
-				data[i] = val;
+				data[i] = value;
 				++i;
 			}
 		}
 
-		Matrix(std::initializer_list<std::initializer_list<T>> init_list) : data{}
+		Matrix(std::initializer_list<std::initializer_list<T>> init_list) : data{ }
 		{
 			assert(init_list.size() == n);
 
@@ -59,7 +60,7 @@ namespace cgm {
 				assert(l.size() == m);
 				for (const auto v : l)
 				{
-					int offset = i * strides.dimOne + j * strides.dimTwo;
+					int offset = i * strides.dimOne + j * strides.dimTwo; //Strides logic must be reviewed
 					*(data + offset) = v;
 					++j;
 				}
@@ -76,14 +77,39 @@ namespace cgm {
 		T& operator()(const int i, const int j)
 		{
 			int offset = i * strides.dimOne + j * strides.dimTwo;
-			return *(data + offset);
+			T result = *(data + offset);
+			return result;
 		}
 
 		T operator()(const int i, const int j) const
 		{
 			int offset = i * strides.dimOne + j * strides.dimTwo;
-			return *(data + offset);
+			T result = *(data + offset);
+			return result;
 		}
+
+		Vector<T, m> row(int idx) const
+		{
+			assert(idx < n);
+			Vector<T, m> vec;
+			for (int col = 0; col < m; col++)
+			{
+				vec[col] = (*this)(idx, col);
+			}
+			return vec;
+		}
+
+		Vector<T, n> column(int idx) const
+		{
+			assert(idx < m);
+			Vector<T, n> vec;
+			for (int row = 0; row < n; row++)
+			{
+				vec[row] = (*this)(row, idx);
+			}
+			return vec;
+		}
+
 
 	};
 }
