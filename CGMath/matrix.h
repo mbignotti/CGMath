@@ -8,23 +8,13 @@
 
 namespace cgm {
 
-	template <typename T, int n, int m>
+	template <typename T, int nrows, int ncols>
 	struct Matrix
 	{
 		// Attributes
-		Shape shape{ n, m };
+		Shape shape{ nrows, ncols };
 
-#ifndef ROW_MAJOR
-
-		Strides strides{ sizeof(T) * m, sizeof(T) };
-
-#else
-
-		Strides strides{ sizeof(T), sizeof(T) * n };
-
-#endif // !ROW_MAJOR
-
-		static const int size = n * m;
+		static const int size = nrows * ncols;
 		T data[size];
 
 		// Constructors
@@ -32,7 +22,7 @@ namespace cgm {
 
 		Matrix(T value) : data{ }
 		{
-			for (int i = 0; i < n; i++)
+			for (int i = 0; i < size; i++)
 			{
 				data[i] = value;
 			}
@@ -50,18 +40,18 @@ namespace cgm {
 			}
 		}
 
-		Matrix(std::initializer_list<std::initializer_list<T>> init_list) : data{ }
+		Matrix(std::initializer_list<std::initializer_list<T>> init_list) :
+			data{}
 		{
-			assert(init_list.size() == n);
+			assert(init_list.size() == nrows);
 
 			int i = 0, j = 0;
 			for (const auto l : init_list)
 			{
-				assert(l.size() == m);
+				assert(l.size() == ncols);
 				for (const auto v : l)
 				{
-					int offset = i * strides.dimOne + j * strides.dimTwo; //Strides logic must be reviewed
-					*(data + offset) = v;
+					data[i * ncols + j] = v;
 					++j;
 				}
 				j = 0;
@@ -74,42 +64,133 @@ namespace cgm {
 
 		// Operators
 		// Access operators
-		T& operator()(const int i, const int j)
+		T& operator()(int row, int col)
 		{
-			int offset = i * strides.dimOne + j * strides.dimTwo;
-			T result = *(data + offset);
-			return result;
+			return data[row * ncols + col];
 		}
 
-		T operator()(const int i, const int j) const
+		T operator()(int row, int col) const
 		{
-			int offset = i * strides.dimOne + j * strides.dimTwo;
-			T result = *(data + offset);
-			return result;
+			return data[row * ncols + col];
 		}
 
-		Vector<T, m> row(int idx) const
+		T* row(int idx) const
 		{
-			assert(idx < n);
-			Vector<T, m> vec;
-			for (int col = 0; col < m; col++)
+			assert(idx < nrows);
+			T row[ncols]{ };
+			std::copy(data + (idx * ncols), data + (idx * ncols) + ncols, row);
+			return row;
+		}
+
+		T* column(int idx) const
+		{
+			assert(idx < ncols);
+			T column[ncols]{ };
+			for (int i = 0; i < nrows; i++)
+			{
+				column[i] = data[i * ncols + idx];
+			}
+			return column;
+		}
+
+		Vector<T, ncols> row2Vec(int idx) const
+		{
+			assert(idx < nrows);
+			Vector<T, ncols> vec;
+			for (int col = 0; col < ncols; col++)
 			{
 				vec[col] = (*this)(idx, col);
 			}
 			return vec;
 		}
 
-		Vector<T, n> column(int idx) const
+		Vector<T, nrows> col2Vec(int idx) const
 		{
-			assert(idx < m);
-			Vector<T, n> vec;
-			for (int row = 0; row < n; row++)
+			assert(idx < ncols);
+			Vector<T, nrows> vec;
+			for (int row = 0; row < nrows; row++)
 			{
 				vec[row] = (*this)(row, idx);
 			}
 			return vec;
 		}
 
+		void set_row(int idx, const T* row)
+		{
+			assert(idx < nrows);
+			std::copy(row, row + ncols, data + (idx * ncols));
+		}
 
+		void set_col(int idx, const T* column)
+		{
+			assert(idx < ncols);
+			for (int i = 0; i < nrows; i++)
+			{
+				data[i * nrows + idx] = column[i];
+			}
+		}
+
+		// Algebraic Operators
+		Matrix<T, nrows, ncols> Add(const T scalar) const
+		{
+			Matrix<T, nrows, ncols> mat = *this;
+			for (int i = 0; i < size; i++)
+			{
+				mat.data[i] = data[i] + scalar;
+			}
+			return mat;
+		}
+
+		Matrix<T, nrows, ncols> Subtract(const T scalar) const
+		{
+			Matrix<T, nrows, ncols> mat = *this;
+			for (int i = 0; i < size; i++)
+			{
+				mat.data[i] = data[i] - scalar;
+			}
+			return mat;
+		}
+
+		Matrix<T, nrows, ncols> Multiply(const T scalar) const
+		{
+			Matrix<T, nrows, ncols> mat = *this;
+			for (int i = 0; i < size; i++)
+			{
+				mat.data[i] = data[i] * scalar;
+			}
+			return mat;
+		}
+
+		Matrix<T, nrows, ncols> Divide(const T scalar) const
+		{
+			T factor = 1 / scalar;
+			if (factor > 0)
+			{
+				Matrix<T, nrows, ncols> mat = *this;
+				for (int i = 0; i < size; i++)
+				{
+					mat.data[i] = data[i] * factor;
+				}
+				return mat;
+			}
+			else
+			{
+				throw("Cannot divide by zero.");
+			}
+		}
+
+		// Methods
+		friend std::ostream& operator << (std::ostream& out, const Matrix<T, nrows, ncols>& mat)
+		{
+			for (size_t row = 0; row < nrows; row++)
+			{
+				for (size_t col = 0; col < ncols; col++)
+				{
+					out << mat(row, col) << " ";
+				}
+				out << "\n";
+			}
+			return out;
+		}
 	};
 }
