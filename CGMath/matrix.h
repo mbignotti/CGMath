@@ -4,7 +4,8 @@
 #include <assert.h>
 #include <iostream>
 #include <initializer_list>
-#include <utils.h>
+#include "utils.h"
+#include "vector.h"
 
 namespace cgm {
 
@@ -12,8 +13,6 @@ namespace cgm {
 	struct Matrix
 	{
 		// Attributes
-		Shape shape{ nrows, ncols };
-
 		static const int size = nrows * ncols;
 		T data[size];
 
@@ -180,11 +179,17 @@ namespace cgm {
 		}
 
 		// Methods
+		constexpr Shape shape()
+		{
+			Shape s(nrows, ncols);
+			return s;
+		}
+
 		friend std::ostream& operator << (std::ostream& out, const Matrix<T, nrows, ncols>& mat)
 		{
-			for (size_t row = 0; row < nrows; row++)
+			for (int row = 0; row < nrows; row++)
 			{
-				for (size_t col = 0; col < ncols; col++)
+				for (int col = 0; col < ncols; col++)
 				{
 					out << mat(row, col) << " ";
 				}
@@ -193,4 +198,149 @@ namespace cgm {
 			return out;
 		}
 	};
+
+	template <typename T, int nrows, int ncols, int ncolsB>
+	Matrix<T, nrows, ncolsB> dot(const Matrix<T, nrows, ncols>& lhs, const Matrix<T, ncols, ncolsB>& rhs)
+	{
+		Matrix<T, nrows, ncolsB> mat;
+		for (int row = 0; row < nrows; row++)
+		{
+			for (int col = 0; col < ncolsB; col++)
+			{
+				for (int idx = 0; idx < ncols; idx++)
+				{
+					mat(row, col) += lhs(row, idx) * rhs(idx, col);
+				}
+			}
+		}
+		return mat;
+	}
+
+	template <typename T, int nrows, int ncols>
+	Vector<T, nrows> dot(const Matrix<T, nrows, ncols>& lhs, const Vector<T, ncols>& rhs)
+	{
+		Vector<T, nrows, true> vec;
+		for (int row = 0; row < nrows; row++)
+		{
+			for (int col = 0; col < ncols; col++)
+			{
+				vec[row] += lhs(row, col) * rhs[col];
+			}
+		}
+		return vec;
+	}
+
+#ifndef ROW_MAJOR
+
+	template <typename T, int nrows, int ncols>
+	Vector<T, ncols> dot(const Vector<T, nrows>& lhs, const Matrix<T, nrows, ncols>& rhs)
+	{
+		Vector<T, ncols, false> vec;
+		for (int col = 0; col < ncols; col++)
+		{
+			for (int row = 0; row < nrows; row++)
+			{
+				vec[col] += rhs(row, col) * lhs[row];
+			}
+		}
+		return vec;
+	}
+
+#endif // !ROW_MAJOR
+
+	// TODO: rewrite based on Shape and move to vector.h
+	template <typename T, int n>
+	Matrix<T, n, n> dot(const Vector<T, n, true>& lhs, const Vector<T, n, false>& rhs)
+	{
+		Matrix<T, n, n> mat;
+		for (int row = 0; row < n; row++)
+		{
+			for (int col = 0; col < n; col++)
+			{
+				mat(row, col) = lhs[row] * rhs[col];
+			}
+		}
+		return mat;
+	}
+
+	template <typename T, int nrows, int ncols>
+	Matrix<T, nrows, ncols> operator + (const Matrix<T, nrows, ncols>& mat, const T scalar)
+	{
+		return mat.Add(scalar);
+	}
+
+	template <typename T, int nrows, int ncols>
+	Matrix<T, nrows, ncols> operator - (const Matrix<T, nrows, ncols>& mat, const T scalar)
+	{
+		return mat.Subtract(scalar);
+	}
+
+	template <typename T, int nrows, int ncols>
+	Matrix<T, nrows, ncols> operator / (const Matrix<T, nrows, ncols>& mat, const T scalar)
+	{
+		return mat.Divide(scalar);
+	}
+
+	template <typename T, int nrows, int ncols>
+	Matrix<T, nrows, ncols> operator * (const Matrix<T, nrows, ncols>& mat, const T scalar)
+	{
+		return mat.Multiply(scalar);
+	}
+
+	template <typename T, int nrows, int ncols, int ncolsB>
+	Matrix<T, nrows, ncolsB> operator * (const Matrix<T, nrows, ncols>& lhs, const Matrix<T, ncols, ncolsB>& rhs)
+	{
+		return dot(lhs, rhs);
+	}
+
+	template <typename T, int nrows, int ncols>
+	Vector<T, nrows> operator * (const Matrix<T, nrows, ncols>& lhs, const Vector<T, ncols, true>& rhs)
+	{
+		return dot(lhs, rhs);
+	}
+
+#ifndef ROW_MAJOR
+
+	template <typename T, int nrows, int ncols>
+	Vector<T, ncols> operator * (const Vector<T, nrows>& lhs, const Matrix<T, nrows, ncols>& rhs)
+	{
+		return dot(lhs, rhs);
+	}
+
+#endif // !ROW_MAJOR
+
+	// TODO rewrite based on Shape and move to vector.h
+	template <typename T, int n>
+	Matrix<T, n, n> operator * (const Vector<T, n, true>& lhs, const Vector<T, n, false>& rhs)
+	{
+		return dot(lhs, rhs);
+	}
+
+	template <typename T, int nrows, int ncols>
+	Matrix<T, ncols, nrows> transpose(const Matrix<T, nrows, ncols>& mat)
+	{
+		Matrix<T, ncols, nrows> matrixTransposed;
+		for (int row = 1; row <= nrows; row++)
+		{
+			for (int col = 1; col <= ncols; col++)
+			{
+				matrixTransposed.data()[(col - 1) * nrows + row - 1] = mat.data()[(row - 1) * ncols + col - 1];
+			}
+		}
+		return matrixTransposed;
+	}
+
+	template <typename T, int nrows, int ncols>
+	Matrix<T, nrows, ncols> identity()
+	{
+		Matrix<T, nrows, ncols> mat;
+		for (int row = 0; row < nrows; row++)
+		{
+			for (int col = 0; col < ncols; col++)
+			{
+				if (row == col) { mat(row, col) = 1; }
+			}
+		}
+		return mat;
+	}
 }
