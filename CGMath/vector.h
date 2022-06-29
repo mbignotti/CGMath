@@ -4,25 +4,16 @@
 #include <assert.h>
 #include <iostream>
 #include <initializer_list>
-#include <utils.h>
+#include "utils.h"
 
 namespace cgm {
 
+	// Defaults to column major. Define ROW_MAJOR to use a row major memory layout.
+	// For vectors, the memory layout does not change, but shape and operations that depend on it do.
 	template <typename T, int n>
 	struct Vector
 	{
 		// Attributes
-		// Defaults to column major. Define ROW_MAJOR to use a row major memory layout.
-		// For vectors, the memory layout does not change, but shape and operations that depend on it do.
-#ifndef ROW_MAJOR
-
-		Shape shape{ n, 1 };
-
-#else
-		Shape shape{ 1, n };
-
-#endif // !ROW_MAJOR
-
 		T data[n];
 
 		// Constructors
@@ -80,6 +71,22 @@ namespace cgm {
 		}
 
 		// Methods
+		constexpr Shape shape()
+		{
+#ifndef ROW_MAJOR
+
+			Shape s(1, n);
+			return s;
+
+#else
+
+			Shape s(n, 1);
+			return s;
+
+#endif // !ROW_MAJOR
+
+		}
+
 		friend std::ostream& operator << (std::ostream& out, const Vector<T, n>& vec)
 		{
 			for (int i = 0; i < n; i++)
@@ -87,11 +94,6 @@ namespace cgm {
 				out << vec[i] << " ";
 			}
 			return out;
-		}
-
-		inline void transpose()
-		{
-			shape.transpose();
 		}
 
 		constexpr int size() { return n; }
