@@ -247,7 +247,7 @@ namespace cgm {
 	template <typename T, int n>
 	bool operator == (const Vector<T, n>& lhs, const Vector<T, n>& rhs)
 	{
-		bool equality{ true };
+		bool equality = true;
 		for (int i = 0; i < n; i++)
 		{
 			if (equality)
@@ -276,7 +276,7 @@ namespace cgm {
 	template <int n>
 	bool any(const Vector<bool, n>& vec)
 	{
-		bool trueCondition{ false };
+		bool trueCondition = false;
 		for (int i = 0; i < n; i++)
 		{
 			if (vec[i])
@@ -291,7 +291,7 @@ namespace cgm {
 	template <int n>
 	bool all(const Vector<bool, n>& vec)
 	{
-		bool trueCondition{ true };
+		bool trueCondition = true;
 		for (int i = 0; i < n; i++)
 		{
 			if (!vec[i])
@@ -306,7 +306,7 @@ namespace cgm {
 	template <typename T, int n>
 	T sum(Vector<T, n> vec)
 	{
-		T result{ 0 };
+		T result = 0;
 		for (int i = 0; i < n; i++)
 		{
 			result += vec[i];
@@ -317,7 +317,7 @@ namespace cgm {
 	template <typename T, int n>
 	T dot(const Vector<T, n>& lhs, const Vector<T, n>& rhs)
 	{
-		T result{ 0 };
+		T result = 0;
 		for (int i = 0; i < n; i++)
 		{
 			result += lhs[i] * rhs[i];
