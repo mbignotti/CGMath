@@ -216,6 +216,8 @@ namespace cgm {
 		return mat;
 	}
 
+#ifndef ROW_MAJOR
+
 	template <typename T, int nrows, int ncols>
 	Vector<T, nrows> dot(const Matrix<T, nrows, ncols>& lhs, const Vector<T, ncols>& rhs)
 	{
@@ -230,7 +232,7 @@ namespace cgm {
 		return vec;
 	}
 
-#ifndef ROW_MAJOR
+#else
 
 	template <typename T, int nrows, int ncols>
 	Vector<T, ncols> dot(const Vector<T, nrows>& lhs, const Matrix<T, nrows, ncols>& rhs)
@@ -293,13 +295,15 @@ namespace cgm {
 		return dot(lhs, rhs);
 	}
 
+#ifndef ROW_MAJOR
+
 	template <typename T, int nrows, int ncols>
 	Vector<T, nrows> operator * (const Matrix<T, nrows, ncols>& lhs, const Vector<T, ncols, true>& rhs)
 	{
 		return dot(lhs, rhs);
 	}
 
-#ifndef ROW_MAJOR
+#else
 
 	template <typename T, int nrows, int ncols>
 	Vector<T, ncols> operator * (const Vector<T, nrows>& lhs, const Matrix<T, nrows, ncols>& rhs)
