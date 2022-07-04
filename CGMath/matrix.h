@@ -216,6 +216,17 @@ namespace cgm {
 		return mat;
 	}
 
+	template <typename T, int nrows, int ncols, int ncolsB>
+	Matrix<T, nrows, ncolsB> dot(const Matrix<T, nrows, ncols>& lhs, const Matrix<T, ncols, ncolsB>& rhs)
+	{
+		Matrix<T, nrows, ncolsB> mat;
+
+		for
+
+		
+		return mat;
+	}
+
 #ifndef ROW_MAJOR
 
 	template <typename T, int nrows, int ncols>
