@@ -28,6 +28,9 @@
     <ClInclude Include="vec4.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="geometry.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
