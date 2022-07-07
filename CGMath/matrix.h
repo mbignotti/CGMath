@@ -73,6 +73,7 @@ namespace cgm {
 			return data[row * ncols + col];
 		}
 
+		// Returns a pointer to a copy of the row, not to the original row
 		T* row(int idx) const
 		{
 			assert(idx < nrows);
@@ -81,6 +82,7 @@ namespace cgm {
 			return row;
 		}
 
+		// Returns a pointer to a copy of the column, not to the original column
 		T* column(int idx) const
 		{
 			assert(idx < ncols);
@@ -284,7 +286,7 @@ namespace cgm {
 #ifndef ROW_MAJOR
 
 	template <typename T, int nrows, int ncols>
-	Vector<T, nrows> operator * (const Matrix<T, nrows, ncols>& lhs, const Vector<T, ncols, true>& rhs)
+	Vector<T, nrows> operator * (const Matrix<T, nrows, ncols>& lhs, const Vector<T, ncols>& rhs)
 	{
 		return dot(lhs, rhs);
 	}
@@ -307,7 +309,7 @@ namespace cgm {
 		{
 			for (int col = 1; col <= ncols; col++)
 			{
-				matrixTransposed.data()[(col - 1) * nrows + row - 1] = mat.data()[(row - 1) * ncols + col - 1];
+				matrixTransposed.data[(col - 1) * nrows + row - 1] = mat.data[(row - 1) * ncols + col - 1];
 			}
 		}
 		return matrixTransposed;
