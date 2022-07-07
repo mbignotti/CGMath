@@ -250,20 +250,6 @@ namespace cgm {
 
 #endif // !ROW_MAJOR
 
-	// TODO: rewrite based on Shape and move to vector.h
-	template <typename T, int n>
-	Matrix<T, n, n> dot(const Vector<T, n, true>& lhs, const Vector<T, n, false>& rhs)
-	{
-		Matrix<T, n, n> mat;
-		for (int row = 0; row < n; row++)
-		{
-			for (int col = 0; col < n; col++)
-			{
-				mat(row, col) = lhs[row] * rhs[col];
-			}
-		}
-		return mat;
-	}
 
 	template <typename T, int nrows, int ncols>
 	Matrix<T, nrows, ncols> operator + (const Matrix<T, nrows, ncols>& mat, const T scalar)
@@ -312,13 +298,6 @@ namespace cgm {
 	}
 
 #endif // !ROW_MAJOR
-
-	// TODO rewrite based on Shape and move to vector.h
-	template <typename T, int n>
-	Matrix<T, n, n> operator * (const Vector<T, n, true>& lhs, const Vector<T, n, false>& rhs)
-	{
-		return dot(lhs, rhs);
-	}
 
 	template <typename T, int nrows, int ncols>
 	Matrix<T, ncols, nrows> transpose(const Matrix<T, nrows, ncols>& mat)
