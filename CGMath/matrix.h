@@ -58,6 +58,40 @@ namespace cgm {
 			}
 		}
 
+#ifndef ROW_MAJOR
+
+		Matrix(std::initializer_list<Vector<T, nrows>> init_list) : data{ }
+		{
+			assert(init_list.size() == ncols);
+
+			int j = 0;
+			for (const auto vec : init_list)
+			{
+				for (int i = 0; i < nrows; i++)
+				{
+					data[i * nrows + j] = vec[i]
+				}
+				++j;
+			}
+		}
+
+#else
+
+		Matrix(std::initializer_list<Vector<T, ncols>> init_list) : data{ }
+		{
+			assert(init_list.size() == nrows);
+
+			for (const auto vec : init_list)
+			{
+				for (int i = 0; i < nrows; i++)
+				{
+					std::copy(vec.data, vec.data + ncols, data + (i * ncols));
+				}
+			}
+		}
+
+#endif // !ROW_MAJOR
+
 		// Destructor
 		~Matrix() { }
 
