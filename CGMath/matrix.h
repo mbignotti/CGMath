@@ -69,7 +69,7 @@ namespace cgm {
 			{
 				for (int i = 0; i < nrows; i++)
 				{
-					data[i * nrows + j] = vec[i]
+					data[i * nrows + j] = vec[i];
 				}
 				++j;
 			}
