@@ -8,8 +8,8 @@
 
 namespace cgm {
 
-	// Defaults to column major. Define ROW_MAJOR to use a row major memory layout.
-	// For vectors, the memory layout does not change, but shape and operations that depend on it do.
+	// Defaults to column major. Declare ROW_MAJOR to use a row major layout.
+	// ROW_MAJOR mainly influences dot products and default matrices (e.g. perspective transform matrix).
 	template <typename T, int n>
 	struct Vector
 	{
@@ -64,9 +64,7 @@ namespace cgm {
 		// Assignment Operator
 		Vector<T, n>& operator=(const Vector<T, n>& vec)
 		{
-			shape = vec.shape;
 			data = vec.data;
-
 			return *this;
 		}
 
