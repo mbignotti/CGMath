@@ -6,7 +6,6 @@ namespace cgm {
 	template <typename T>
 	struct Vec4 : public Vector<T, 4> {
 
-		using Vector<T, 4>::shape;
 		using Vector<T, 4>::data;
 		using Vector<T, 4>::Vector;
 
@@ -24,9 +23,7 @@ namespace cgm {
 		// Assignment Operator
 		Vec4<T>& operator=(const Vec4<T>& vec)
 		{
-			shape = vec.shape;
 			data = vec.data;
-
 			return *this;
 		}
 
