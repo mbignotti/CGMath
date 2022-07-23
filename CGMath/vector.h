@@ -62,11 +62,11 @@ namespace cgm {
 		}
 
 		// Assignment Operator
-		Vector<T, n>& operator=(const Vector<T, n>& vec)
+		/*Vector<T, n>& operator=(const Vector<T, n>& vec)
 		{
 			data = vec.data;
 			return *this;
-		}
+		}*/
 
 		// Methods
 		constexpr Shape shape()

@@ -21,11 +21,11 @@ namespace cgm {
 		}
 
 		// Assignment Operator
-		Vec3<T>& operator=(const Vec3<T>& vec)
+		/*Vec3<T>& operator=(const Vec3<T>& vec)
 		{
 			data = vec.data;
 			return *this;
-		}
+		}*/
 
 		inline T& x() { return data[0]; }
 		inline const T& x() const { return data[0]; }
